@@ -7,16 +7,16 @@ import json
 class keylog():
 
     def __init__(self, kbinput, dict_path):
+        # keyboard object
         self.input = kbinput
+        # stores inputs which is used to match the dictionary json file
         self.input_buffer = list()
         
+        #json file used to save key replacements
         with open(dict_path) as f:
             self.load_dict = json.load(f)
 
     def on_press(self, key):
-        # buffer used to write to text file and match with dict
-        temp_buffer = list()
-        
         # replace is the text string used to check with dictionary
         replace = list()
 
@@ -27,34 +27,29 @@ class keylog():
         if key == _kb_.Key.space:
             # once space is hit, the buffer is matched with a dict key and then
             # next step is to use pynput to simulate key presses
-            # for reg need to do one backspace and then type 'ular'
-            temp_buffer = self.input_buffer
-            print(temp_buffer)
-            key = ''.join(map(str, temp_buffer))
+            # print(temp_buffer)
+            key = ''.join(map(str, self.input_buffer))
             replace = self.load_dict.get(key, False)
             
             if replace != False:
-                for i in range(0, len(temp_buffer)+1):
+                for i in range(0, len(self.input_buffer)+1):
                     self.input.press(_kb_.Key.backspace)
                     self.input.release(_kb_.Key.backspace)
                 self.input.type(replace)
             
             self.input_buffer = list()
-            temp_buffer = list()
             replace = list()
             
         if key == _kb_.Key.backspace:
-            # Pop temp buffer and copy to persistent buffer
-            temp_buffer = self.input_buffer
-            temp_buffer = temp_buffer[:-1]
-            self.input_buffer = temp_buffer
+            # remove last key from input buffer
+            self.input_buffer = self.input_buffer[:-1]
             
         try:
-            temp_buffer = self.input_buffer
-            temp_buffer += key.char
-            self.input_buffer = temp_buffer
+            #add key to input buffer
+            self.input_buffer += key.char
 
         except AttributeError:
+            #if special key such as shift or control then ignore
             pass
     
 class GUI():
@@ -79,7 +74,7 @@ class GUI():
         self.snippetBox = _tk_.LabelFrame(self.captureBox, text="Snippets box")
         self.snippetBox.grid(column=0, row=0)
         
-        self.buttonBar  = _tk_.LabelFrame(self.captureBox, text="Buttom Bar")
+        self.buttonBar  = _tk_.LabelFrame(self.captureBox, text="Button Bar")
         self.buttonBar.grid(column=0, row=1)
         
         #Create snippets
